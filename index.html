@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>eye_hack.py</title>
+<style>
+  :root{box-sizing:border-box;color-scheme:dark;--bg:#04060c;--bar:#09101d;--line:#0f3550;--dim:#4f6b86;--txt:#b9d7ee;--cy:#19f3ff;--mg:#ff2bd6;--gr:#39ff88;
+    padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font:13px/1.55 ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;overflow:hidden}
+  body{display:flex;flex-direction:column;height:100%;background:radial-gradient(ellipse at 50% 30%,#0a1830 0,var(--bg) 70%)}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px)}
+  .top{display:flex;align-items:stretch;background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+  .tab{padding:8px 14px;border-top:2px solid var(--cy);color:var(--cy);text-shadow:0 0 8px var(--cy);background:#050a14}
+  .sp{flex:1}
+  #run{margin:5px 8px;padding:0 14px;border:1px solid var(--gr);border-radius:4px;background:#04170d;color:var(--gr);font:inherit;font-weight:700;cursor:pointer;text-shadow:0 0 8px var(--gr);box-shadow:0 0 14px #39ff8844,inset 0 0 10px #39ff8822}
+  #run:hover{background:#0a2a18} #run:focus-visible,#x:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .editor{flex:1;overflow:auto;padding:10px 0;min-height:0}
+  .ln{display:flex;white-space:pre;min-width:max-content}
+  .ln i{flex:none;width:44px;padding-right:14px;text-align:right;color:#27425a;font-style:normal;user-select:none}
+  .k{color:#ff4fd8}.s{color:#39ff88}.c{color:#4f6b86}.n{color:#ffb454}.f{color:#19f3ff}.m{color:#8ab4ff}
+  .panel{flex:none;height:128px;border-top:1px solid var(--line);background:#03060b;display:flex;flex-direction:column}
+  .ptabs{display:flex;gap:18px;padding:5px 14px;color:var(--dim);font-size:12px}
+  .ptabs b{color:var(--cy);font-weight:400;border-bottom:1px solid var(--cy)}
+  #term{flex:1;overflow:auto;padding:0 14px 8px;white-space:pre-wrap;color:var(--gr)}
+  .status{flex:none;background:#062033;color:var(--cy);border-top:1px solid var(--line);padding:2px 12px;font-size:12px;display:flex;gap:16px}
+  #win{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(780px,calc(100vw - 20px));background:#000;border:1px solid #19f3ff88;border-radius:8px;box-shadow:0 0 40px #19f3ff33,0 0 120px #ff2bd622,0 18px 60px #000;overflow:hidden;z-index:5;animation:pop .22s ease-out}
+  #win[hidden]{display:none}
+  @keyframes pop{from{opacity:0;transform:translate(-50%,-47%) scale(.95)}}
+  .tb{display:flex;align-items:center;justify-content:space-between;padding:6px 6px 6px 12px;background:#07121f;border-bottom:1px solid #19f3ff44;color:var(--cy);cursor:grab;touch-action:none;user-select:none;font-size:12px}
+  #x{background:none;border:0;color:#9cc;font-size:15px;width:30px;height:24px;cursor:pointer;border-radius:4px}
+  #x:hover{background:#c42b1c;color:#fff}
+  .body{aspect-ratio:5/4;background:#000;position:relative}
+  .body::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 1px,transparent 1px 3px)}
+  canvas{display:block;width:100%;height:100%}
+  @media (prefers-reduced-motion:reduce){#win{animation:none}}
+</style>
+</head>
+<body>
+<div class="top"><div class="tab">eye_hack.py</div><div class="sp"></div><button id="run" aria-label="Run eye_hack.py">▶ Run</button></div>
+<div class="editor" id="ed" tabindex="0" aria-label="eye_hack.py source"></div>
+<div class="panel"><div class="ptabs"><span>Console</span><span>Ports</span><b>Terminal</b><span>Outline</span></div><div id="term">$ </div></div>
+<div class="status"><span>Python 3</span><span>UTF-8</span><span>cyber-theme</span></div>
+<div id="win" hidden role="dialog" aria-label="Eye -> Hack">
+  <div class="tb" id="tb"><span>Eye -> Hack</span><button id="x" aria-label="Close window">✕</button></div>
+  <div class="body" id="wrap"><canvas id="c"></canvas></div>
+</div>
+<script>
+/* ---------- کد نمایش داده‌شده ---------- */
+const CODE=[
+"import time","import numpy as np","import tkinter as tk","from PIL import Image, ImageDraw, ImageFont, ImageTk","",
+"COLS, ROWS = 110, 52","RAMP = \" .'`,:;-~+=*xoOXQ#%@\"","BLINKS = [2.4, 3.8, 4.15, 5.6]","",
+"def ss(a, b, x):","    t = np.clip((x - a) / (b - a), 0, 1)","    return t * t * (3 - 2 * t)","",
+"def eye(t, zoom):","    u, v = U0 * zoom, V0 * zoom","    op = 1 - 0.97 * sum(np.exp(-((t - b) / 0.07) ** 2) for b in BLINKS)",
+"    iris = 1 - ss(0.29, 0.31, r)","    fibers = noise(np.cos(ang) * 6, np.sin(ang) * 6 + r * 3)","    veins = ss(0.72, 0.78, noise(u * 18 + v * 5, v * 25))",
+"    lashes = (hash2(np.floor(u * 42), 3) > 0.35) & (dist < lash_len)","    hud = ring(r, 0.37, 0.385) + ticks(ang + t * 0.5, 48)","    return skin_sclera_iris_hud","",
+"def matrix_rain(t):","    head = ((t - 8.6) * speed + offset) % (ROWS + tail)","    return np.clip(1 - (head - rows) / tail, 0, 1)","",
+"LOG = [","    \"root@cyber:~# ssh -p 22 target.local\",","    \"[*] scanning ports: 22 80 443 8080\",","    \"[+] weak service found on :8080\",",
+"    \"[*] injecting payload\",","    \"[*] bypassing firewall ...... OK\",","    \"[+] ROOT ACCESS GRANTED\",","]","",
+"def hack_scene(t):","    for line in LOG:","        type_out(line)","    glitch(t)","    print(\"Believe in yourself\")","",
+"root = tk.Tk()","root.title(\"Eye -> Hack\")","root.mainloop()"];
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const hl=s=>esc(s).replace(/(#.*)|("(?:[^"\\]|\\.)*")|\b(def|return|import|from|as|for|in)\b|\b(np|tk)\b|\b([A-Za-z_]\w*)(?=\()|\b(\d+\.?\d*)\b/g,
+ (m,c,st,k,mod,fn,n)=>c?`<span class="c">${m}</span>`:st?`<span class="s">${m}</span>`:k?`<span class="k">${m}</span>`:mod?`<span class="m">${m}</span>`:fn?`<span class="f">${m}</span>`:`<span class="n">${m}</span>`);
+document.getElementById('ed').innerHTML=CODE.map((l,i)=>`<div class="ln"><i>${i+1}</i><span>${hl(l)||" "}</span></div>`).join("");
+
+/* ---------- ترمینال و پنجره ---------- */
+const term=document.getElementById('term'),win=document.getElementById('win'),wrap=document.getElementById('wrap');
+const log=s=>{term.textContent+=s;term.scrollTop=term.scrollHeight};
+let running=false,t0=0,fin=false;
+document.getElementById('run').onclick=()=>{
+  if(running)return;
+  win.style.left=win.style.top=win.style.transform='';
+  win.hidden=false;running=true;fin=false;
+  log("python eye_hack.py\n");setup();t0=performance.now();requestAnimationFrame(draw)};
+function closeWin(){if(!running)return;running=false;win.hidden=true;log("Process finished with exit code 0\n$ ")}
+document.getElementById('x').onclick=closeWin;
+addEventListener('keydown',e=>{if(e.key==='Escape')closeWin()});
+const tb=document.getElementById('tb');let drag=null;
+tb.addEventListener('pointerdown',e=>{if(e.target.id==='x')return;
+  const r=win.getBoundingClientRect();win.style.transform='none';win.style.left=r.left+'px';win.style.top=r.top+'px';
+  drag={dx:e.clientX-r.left,dy:e.clientY-r.top};tb.setPointerCapture(e.pointerId);tb.style.cursor='grabbing'});
+tb.addEventListener('pointermove',e=>{if(!drag)return;
+  win.style.left=Math.min(innerWidth-60,Math.max(-win.offsetWidth+60,e.clientX-drag.dx))+'px';
+  win.style.top=Math.min(innerHeight-30,Math.max(0,e.clientY-drag.dy))+'px'});
+tb.addEventListener('pointerup',()=>{drag=null;tb.style.cursor='grab'});
+
+/* ---------- ابزارها ---------- */
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const RAMP=" .'`,:;-~+=*xoOXQ#%@",RAIN="01ABCDEF<>{}[]$#%/=+",HEXC="0123456789abcdef";
+const BLINKS=[2.4,3.8,4.15,5.6],ZS=7.6,ZE=9.8,T_H=9.9,MSG="Believe in yourself";
+let W,H,CW,CH,COLS,ROWS,NORM,U0,V0,dpr,RS,RO,RL;
+const ss=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
+const mix=(a,b,t)=>a+(b-a)*t,fract=x=>x-Math.floor(x);
+const hash=(x,y)=>fract(Math.sin(x*127.1+y*311.7)*43758.5453);
+function noise(x,y){const ix=Math.floor(x),iy=Math.floor(y);let fx=x-ix,fy=y-iy;fx=fx*fx*(3-2*fx);fy=fy*fy*(3-2*fy);
+  return mix(mix(hash(ix,iy),hash(ix+1,iy),fx),mix(hash(ix,iy+1),hash(ix+1,iy+1),fx),fy)}
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+
+// زمان‌بندی لاگ هک
+const LINES=[{t:"root@cyber:~# ssh -p 22 target.local"},{t:"[*] resolving host ......... 10.13.37.7"},{t:"[*] scanning ports: 22 80 443 8080"},
+ {t:"[+] weak service found on :8080"},{t:"[*] injecting payload"},{bar:1},{t:"[*] bypassing firewall ...... OK"},{hex:1},{t:"[+] ROOT ACCESS GRANTED"}];
+let cur=T_H;for(const L of LINES){L.s=cur;L.d=L.bar?2:L.hex?1.6:L.t.length/50+.3;cur+=L.d}
+const END=cur+.6,FIN=END+1.3;
+const hexs=k=>{let s="";for(let i=0;i<16;i++)s+=HEXC[Math.floor(hash(i+k*7.3,k)*16)];return s};
+function lineText(L,t){
+  if(L.bar){const p=Math.min(1,(t-L.s)/L.d),f=Math.round(p*24);return"[*] uploading payload ["+"█".repeat(f)+"░".repeat(24-f)+"] "+Math.round(p*100)+"%"}
+  if(L.hex){return t-L.s>=L.d?"[*] decrypting 5f4dcc3b5aa765d6 ... OK":"[*] decrypting "+hexs(Math.floor(t*18))+" ..."}
+  return L.t.slice(0,Math.max(0,Math.floor((t-L.s)*50)))}
+const lcol=s=>s.startsWith("[+]")?"#39ff88":s.startsWith("[*]")?"#4de8ff":s.startsWith("root")?"#ff4fd8":"#cfe";
+
+function setup(){
+  dpr=Math.min(devicePixelRatio||1,2);W=wrap.clientWidth;H=wrap.clientHeight;
+  cv.width=W*dpr;cv.height=H*dpr;CW=W<500?6:8;CH=W<500?10:14;
+  COLS=Math.floor(W/CW);ROWS=Math.floor(H/CH);NORM=Math.min(H,W)/2;
+  U0=new Float32Array(COLS*ROWS);V0=new Float32Array(COLS*ROWS);
+  for(let i=0;i<ROWS;i++)for(let j=0;j<COLS;j++){U0[i*COLS+j]=(j-COLS/2+.5)*CW/NORM;V0[i*COLS+j]=(i-ROWS/2+.5)*CH/NORM}
+  RS=[];RO=[];RL=[];for(let j=0;j<COLS;j++){RS.push(8+rnd()*14);RO.push(rnd()*ROWS*2);RL.push(8+rnd()*14)}
+}
+addEventListener('resize',()=>{if(running)setup()});
+
+/* ---------- چشم ---------- */
+function eyePixel(u,v,t,op,cx,cy,pr,sy,hud,o){
+  const sh=Math.pow(Math.max(0,1-(u/.95)**2),.7),hu=op*.46*sh,hl=op*.30*sh;
+  const lid=v<0?hu+v:hl-v,inside=ss(-.01,.02,lid);
+  const du=u-cx,dv=v-cy,r=Math.hypot(du,dv),ang=Math.atan2(dv,du),ca=Math.cos(ang),sa=Math.sin(ang);
+  const iris=1-ss(.29,.31,r),pupil=1-ss(pr-.01,pr+.01,r),limb=ss(.23,.29,r)*iris;
+  const f=noise(ca*6+3,sa*6+r*3)*.6+noise(ca*14+7,sa*14+r*5)*.4;
+  const crypt=ss(.72,.85,noise(ca*5+11,sa*5+r*9))*ss(.12,.16,r)*(1-ss(.2,.26,r));
+  const collar=Math.exp(-(((r-.17)/.012)**2)),dk=(1-.75*limb)*(1-.5*crypt);
+  const ir=mix(0,.25,f)*dk+collar*.3+limb*.2,ig=mix(.45,.95,f)*dk+collar*.35,ib=mix(.6,1,f)*dk+collar*.35;
+  // صلبیه
+  const shd=(1-.55*Math.min(1,Math.abs(u)/.95)**2)*mix(.55,1,ss(0,.14,lid));
+  const vein=ss(.72,.78,noise(u*18+v*5,v*25))*ss(.3,.45,r)*.5;
+  const car=Math.exp(-((((u+.82)/.07)**2)+(((v-.04)/.05)**2)));
+  let sR=mix(.82*shd+vein*.25,.9,car),sG=mix(Math.max(0,.88*shd-vein*.35),.4,car),sB=mix(Math.max(0,.95*shd-vein*.3),.5,car);
+  let R=mix(sR,ir,iris),G=mix(sG,ig,iris),B=mix(sB,ib,iris);
+  R=mix(R,.01,pupil);G=mix(G,.02,pupil);B=mix(B,.03,pupil);
+  const spec=Math.exp(-(((du+.07)**2+(dv+.07)**2)/.0018))*.9+Math.exp(-(((du-.08)**2+(dv-.06)**2)/.0007))*.45;
+  const tear=Math.exp(-((lid/.012)**2))*.3;R+=spec+tear;G+=spec+tear;B+=spec+tear;
+  // پوست، چین پلک، مژه
+  const dist=-lid,up=v<0&&lid<0&&op>.15;
+  const crease=up?Math.exp(-(((dist-.14)/.018)**2))*.55:0;
+  const col=Math.floor(u*40),lash=up&&sh>.1&&dist<.05+.07*hash(col,3)&&fract(u*40)<.45&&hash(col,1)>.3?.95:0;
+  const sk=(.55+.25*noise(u*30,v*30))*(1-crease)*(1-lash);
+  const by=-.62+.25*(u/1.2)**2,brow=Math.exp(-(((v-by)/.05)**2))*ss(-1.1,-.2,-Math.abs(u))*.85;
+  let kR=mix(.30*sk,.06,brow),kG=mix(.20*sk,.04,brow),kB=mix(.42*sk,.1,brow);
+  let oR=mix(kR,R,inside),oG=mix(kG,G,inside),oB=mix(kB,B,inside);
+  // HUD سایبری
+  if(hud>0){
+    const ring=Math.exp(-(((r-.375)/.007)**2)),tick=r>.39&&r<.415&&fract((ang+t*.5)/6.2832*48)<.3?.8:0;
+    const dash=Math.abs(r-.45)<.006&&fract((ang-t*.4)/6.2832*8)<.55?.7:0;
+    const band=Math.exp(-(((v-sy)/.025)**2))*.35*inside,h=hud*(ring*.9+tick+dash+band);
+    oR+=.1*h;oG+=.95*h;oB+=1*h}
+  o[0]=oR;o[1]=oG;o[2]=oB}
+
+/* ---------- فریم ---------- */
+const px=[0,0,0];
+function draw(now){
+  if(!running)return;
+  const t=(now-t0)/1000,zoom=Math.exp(-4.6*ss(ZS,ZE,t)),rn=ss(ZS+1.3,ZE,t);
+  let b=0;for(const bt of BLINKS)b+=Math.exp(-(((t-bt)/.07)**2));
+  const op=ss(0,.9,t)*(1-.97*Math.min(1,b)),cx=.035*Math.sin(t*.9),cy=.02*Math.cos(t*.7),pr=.11+.015*Math.sin(t*1.8);
+  const hud=ss(1,1.8,t)*(1-ss(ZS+.2,ZS+1.4,t)),sy=((t*.4)%1)*1.2-.6;
+  const amp=.55*(1-.5*ss(FIN,FIN+1,t));
+  const gl=Math.max(.5*ss(ZE-1.2,ZE,t)*(1-ss(ZE,ZE+.8,t)),ss(END,END+.2,t)*(1-ss(FIN-.1,FIN+.3,t))),gs=Math.floor(t*18);
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  ctx.font=(CH-1)+'px ui-monospace,Menlo,Consolas,monospace';ctx.textBaseline='top';
+  const n=RAMP.length-1,withEye=t<ZE+.6;
+  for(let i=0;i<ROWS;i++){
+    const ox=gl>0&&hash(i,gs)>1-.25*gl?(hash(i+9,gs)-.5)*60*gl:0;
+    for(let j=0;j<COLS;j++){
+      const id=i*COLS+j,u0=U0[id],v0=V0[id];let R=0,G=0,B=0,l=0,ch=null;
+      if(withEye){eyePixel(u0*zoom,v0*zoom,t,op,cx,cy,pr,sy,hud,px);R=px[0];G=px[1];B=px[2];l=Math.max(R,G,B)}
+      if(rn>0){
+        const P=ROWS+RL[j],hd=(((t-ZS)*RS[j]+RO[j])%P+P)%P,d=hd-i;
+        if(d>=0&&d<RL[j]){
+          const q=1-d/RL[j],rl=(d<1?1:.15+.7*q)*amp,rr=d<1?.8:0,rg=d<1?1:.9*q+.1,rb=d<1?.9:.55*q+.1;
+          if(rl*rn>l*(1-rn)){R=rr*rl;G=rg*rl;B=rb*rl;l=rl*rn;ch=RAIN[Math.floor(hash(i*3.1+j,Math.floor(t*7+j*.37))*RAIN.length)]}
+          else{l*=1-rn}
+        }else l*=1-rn}
+      l=Math.min(1,l*(1-.5*Math.min(1,Math.hypot(u0,v0)/1.3)**2));if(l<.04)continue;
+      const m=Math.max(R,G,B,1e-6),br=Math.min(1,.35+l*1.2)*255/m;
+      ctx.fillStyle=`rgb(${Math.min(255,R*br)|0},${Math.min(255,G*br)|0},${Math.min(255,B*br)|0})`;
+      ctx.fillText(ch||RAMP[Math.min(n,Math.floor(Math.pow(l,.8)*n))],j*CW+ox,i*CH)}}
+  if(t>=T_H-.3&&t<FIN)drawLog(t);
+  if(gl>.3){for(let k=0;k<7;k++){ctx.fillStyle=k%2?'rgba(255,43,214,.22)':'rgba(25,243,255,.22)';ctx.fillRect(Math.random()*W,Math.random()*H,Math.random()*W*.5,2+Math.random()*4)}}
+  if(t>=FIN)drawMsg(t);
+  requestAnimationFrame(draw)}
+
+function drawLog(t){
+  const fs=Math.max(10,Math.min(15,W/46)),lh=fs*1.55,x=W*.05,y=H*.07,h=(LINES.length+1)*lh+fs*1.6,a=ss(T_H-.3,T_H+.2,t);
+  ctx.globalAlpha=a;ctx.fillStyle='rgba(2,10,18,.86)';ctx.fillRect(x,y,W*.9,h);
+  ctx.strokeStyle='rgba(25,243,255,.55)';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,W*.9,h);
+  ctx.font=fs+'px ui-monospace,Menlo,Consolas,monospace';ctx.fillStyle='#4f6b86';ctx.fillText("// breach.sh",x+fs*.8,y+fs*.6);
+  let k=0,last=null;
+  for(const L of LINES){if(t<L.s)break;const s=lineText(L,t);ctx.fillStyle=lcol(s);ctx.shadowColor=lcol(s);ctx.shadowBlur=6;
+    ctx.fillText(s,x+fs*.8,y+fs*.6+lh*(k+1));ctx.shadowBlur=0;last=[s,k];k++}
+  if(last&&Math.floor(t*3)%2===0){ctx.fillStyle='#fff';ctx.fillText("█",x+fs*.8+ctx.measureText(last[0]).width+2,y+fs*.6+lh*(last[1]+1))}
+  ctx.globalAlpha=1}
+
+function drawMsg(t){
+  if(!fin){fin=true;log("Believe in yourself\n")}
+  const fs=Math.min(W*.9/(MSG.length*.6),56),w=fs*.6,x0=(W-MSG.length*w)/2,y=H/2-fs/2;
+  ctx.font='700 '+fs+'px ui-monospace,Menlo,Consolas,monospace';ctx.textBaseline='top';
+  for(let pass=0;pass<2;pass++){
+    ctx.shadowColor=pass?'#19f3ff':'#ff2bd6';ctx.shadowBlur=pass?26:10;ctx.fillStyle=pass?'#d9fdff':'rgba(255,43,214,.6)';
+    for(let k=0;k<MSG.length;k++){
+      const res=(t-FIN-.2)*16-k*1.3;let c=MSG[k];
+      if(c!==" "&&res<0)c=RAIN[Math.floor(hash(k,Math.floor(t*20))*RAIN.length)];
+      ctx.fillText(c,x0+k*w+(pass?0:2),y+(pass?0:1))}}
+  ctx.shadowBlur=0;ctx.font=Math.max(11,fs*.32)+'px ui-monospace,Menlo,Consolas,monospace';ctx.fillStyle='#4de8ff';
+  if(t>FIN+2.2)ctx.fillText("> exit 0"+(Math.floor(t*2)%2?" █":""),x0,y+fs*1.5);
+  if(t>FIN+4){ctx.fillStyle='#4f6b86';ctx.fillText("click to replay",x0,y+fs*2.3)}}
+cv.addEventListener('click',()=>{if(running&&(performance.now()-t0)/1000>FIN+3){t0=performance.now();fin=false;log("python eye_hack.py\n")}});
+</script>
+</body>
+</html>
